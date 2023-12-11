@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text;
+using System.Globalization;
 
 namespace fix_lcu_window_bin
 {
@@ -25,6 +26,8 @@ namespace fix_lcu_window_bin
 
         [DllImport("user32.dll")]
         private static extern uint GetDpiForWindow([In] IntPtr hmonitor);
+
+        static bool bIsChinese;
 
         // 取commandline
         private static string GetCommandLineByProcessId(int processId)
@@ -137,7 +140,8 @@ namespace fix_lcu_window_bin
 
         private static void emitExit()
         {
-            Console.WriteLine("按任意键退出...");
+            if (bIsChinese) Console.WriteLine("按任意键退出...");
+            else Console.WriteLine("Press any key to exit");
             Console.ReadKey();
         }
 
@@ -148,7 +152,8 @@ namespace fix_lcu_window_bin
 
             if (!LeagueClientUxArgs.Available)
             {
-                Console.WriteLine("Can't find LeagueClientUx process.");
+                if (bIsChinese) Console.WriteLine("无法找到 LeagueClientUx 进程");
+                else Console.WriteLine("Can't find LeagueClientUx process.");
                 emitExit();
                 return;
             }
@@ -158,7 +163,8 @@ namespace fix_lcu_window_bin
 
             if (pLeagueClientWindowHWnd == IntPtr.Zero || pLeagueClientWindowCefHWnd == IntPtr.Zero)
             {
-                Console.WriteLine("Can't find LeagueClient window.");
+                if (bIsChinese) Console.WriteLine("无法找到 LeagueClient 窗口");
+                else Console.WriteLine("Can't find LeagueClient window.");
                 emitExit();
                 return;
             }
@@ -170,6 +176,7 @@ namespace fix_lcu_window_bin
 
             if (fLeagueClientZoom == -1)
             {
+                if (bIsChinese) Console.WriteLine("无法设置 LeagueClientUx 的原始缩放");
                 Console.WriteLine("Can't get original zoom of LeagueClientUx");
                 emitExit();
                 return;
@@ -178,20 +185,42 @@ namespace fix_lcu_window_bin
             int iTargetWindowWidth = (int)(1280 * fLeagueClientZoom);
             int iTargetWindowHeight = (int)(720 * fLeagueClientZoom);
 
-            Console.WriteLine("LeagueClientPort: " + LeagueClientUxArgs.Port);
-            Console.WriteLine("LeagueClientAuthtoken: " + LeagueClientUxArgs.Token);
-            Console.WriteLine("LeagueClientOriginZoom: " + fLeagueClientZoom);
-            Console.WriteLine("LeagueClientWindowHWnd: " + pLeagueClientWindowHWnd);
-            Console.WriteLine("LeagueClientWindowCefHWnd: " + pLeagueClientWindowCefHWnd);
-            Console.WriteLine("ScreenWidth: " + iScreenWidth * fScreenDpi);
-            Console.WriteLine("ScreenHeight: " + iScreenHeight * fScreenDpi);
-            Console.WriteLine("ScreenDpi: " + fScreenDpi);
-            Console.WriteLine("TargetWindowWidth: " + iTargetWindowWidth);
-            Console.WriteLine("TargetWindowHeight: " + iTargetWindowHeight);
+            if (bIsChinese)
+            {
 
-            Console.WriteLine("-----------------------------");
-            Console.WriteLine("客户端修复成功!");
-            Console.WriteLine("-----------------------------");
+                Console.WriteLine("客户端端口: " + LeagueClientUxArgs.Port);
+                Console.WriteLine("客户端认证token: " + LeagueClientUxArgs.Token);
+                Console.WriteLine("客户端原始缩放: " + fLeagueClientZoom);
+                Console.WriteLine("客户端窗体HWnd: " + pLeagueClientWindowHWnd);
+                Console.WriteLine("客户端WindowCefHWnd: " + pLeagueClientWindowCefHWnd);
+                Console.WriteLine("窗体宽度: " + iScreenWidth * fScreenDpi);
+                Console.WriteLine("窗体高度: " + iScreenHeight * fScreenDpi);
+                Console.WriteLine("屏幕DPI: " + fScreenDpi);
+                Console.WriteLine("目标窗体宽度: " + iTargetWindowWidth);
+                Console.WriteLine("目标窗体高度: " + iTargetWindowHeight);
+
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("客户端修复成功!");
+                Console.WriteLine("-----------------------------");
+            }
+            else
+            {
+                Console.WriteLine("LeagueClientPort: " + LeagueClientUxArgs.Port);
+                Console.WriteLine("LeagueClientAuthtoken: " + LeagueClientUxArgs.Token);
+                Console.WriteLine("LeagueClientOriginZoom: " + fLeagueClientZoom);
+                Console.WriteLine("LeagueClientWindowHWnd: " + pLeagueClientWindowHWnd);
+                Console.WriteLine("LeagueClientWindowCefHWnd: " + pLeagueClientWindowCefHWnd);
+                Console.WriteLine("ScreenWidth: " + iScreenWidth * fScreenDpi);
+                Console.WriteLine("ScreenHeight: " + iScreenHeight * fScreenDpi);
+                Console.WriteLine("ScreenDpi: " + fScreenDpi);
+                Console.WriteLine("TargetWindowWidth: " + iTargetWindowWidth);
+                Console.WriteLine("TargetWindowHeight: " + iTargetWindowHeight);
+
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("Client fixed!");
+                Console.WriteLine("-----------------------------");
+            }
+
 
             SetWindowPos(pLeagueClientWindowHWnd, 0, (iScreenWidth - iTargetWindowWidth) / 2, (iScreenHeight - iTargetWindowHeight) / 2, iTargetWindowWidth, iTargetWindowHeight, 0x0040);
             SetWindowPos(pLeagueClientWindowCefHWnd, 0, 0, 0, iTargetWindowWidth, iTargetWindowHeight, 0x0040);
@@ -204,38 +233,68 @@ namespace fix_lcu_window_bin
 
             if (!LeagueClientUxArgs.Available)
             {
-                Console.WriteLine("Can't find LeagueClientUx process.");
+                if (bIsChinese) Console.WriteLine("无法找到 LeagueClientUx 进程。");
+                else Console.WriteLine("Can't find LeagueClientUx process.");
                 emitExit();
                 return;
             }
 
             if (!await RestartClientUx(LeagueClientUxArgs.Port, LeagueClientUxArgs.Token))
             {
-                Console.WriteLine("Failed to reload LeagueClientUx.");
+                if (bIsChinese) Console.WriteLine("重载 LeagueClientUx 失败。");
+                else Console.WriteLine("Failed to reload LeagueClientUx.");
                 emitExit();
                 return;
             }
+            if (bIsChinese)
+            {
+                Console.WriteLine("客户端端口: " + LeagueClientUxArgs.Port);
+                Console.WriteLine("客户端认证token: " + LeagueClientUxArgs.Token);
 
-            Console.WriteLine("LeagueClientPort: " + LeagueClientUxArgs.Port);
-            Console.WriteLine("LeagueClientAuthtoken: " + LeagueClientUxArgs.Token);
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("客户端修复成功!");
+                Console.WriteLine("-----------------------------");
+            }
+            else
+            {
+                Console.WriteLine("LeagueClientPort: " + LeagueClientUxArgs.Port);
+                Console.WriteLine("LeagueClientAuthtoken: " + LeagueClientUxArgs.Token);
 
-            Console.WriteLine("-----------------------------");
-            Console.WriteLine("客户端修复成功!");
-            Console.WriteLine("-----------------------------");
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("Client fixed!");
+                Console.WriteLine("-----------------------------");
+            }
         }
 
         static void Main(string[] args)
         {
-            Console.WriteLine("-----------------------------");
-            Console.WriteLine("Bilibili: Butter_Cookies");
-            Console.WriteLine("Github: https://github.com/LeagueTavern/fix-lcu-window");
-            Console.WriteLine("Code by LeagueTavern");
-            Console.WriteLine("-----------------------------");
-            Console.WriteLine("选择修复模式:");
-            Console.WriteLine("[1]: 通过 窗口句柄 修复客户端");
-            Console.WriteLine("[2]: 通过 LCUAPI 热重载客户端");
-            Console.WriteLine("-----------------------------");
-            Console.WriteLine("输入您想选择的修复模式 [1]:");
+            bIsChinese = System.Globalization.CultureInfo.InstalledUICulture.Name.Equals("zh-CN");
+            if (bIsChinese)
+            {
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("Bilibili: Butter_Cookies");
+                Console.WriteLine("Github: https://github.com/LeagueTavern/fix-lcu-window");
+                Console.WriteLine("Code by LeagueTavern");
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("选择修复模式:");
+                Console.WriteLine("[1]: 通过 窗口句柄 修复客户端");
+                Console.WriteLine("[2]: 通过 LCUAPI 热重载客户端");
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("输入您想选择的修复模式 [1]:");
+            }
+            else
+            {
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("Bilibili: Butter_Cookies");
+                Console.WriteLine("Github: https://github.com/LeagueTavern/fix-lcu-window");
+                Console.WriteLine("Code by LeagueTavern");
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("Select fix method:");
+                Console.WriteLine("[1]: Fix client by window handle");
+                Console.WriteLine("[2]: hot reload client by LCUAPI");
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine("Type the fix method you prefer [1]:");
+            }
 
             String strUserInput = Console.ReadLine();
             int iUserChoice;
