@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.ComponentModel;
-using System.Drawing;
 
 namespace Fix_LCU_Window.Util
 {
