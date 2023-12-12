@@ -13,7 +13,7 @@
 - 本工具依赖 `.NET Framework 4.8` (`Windows 10` 以上一般自带)
 
 ## 🚀如何使用
-1. 从[这里](https://github.com/LeagueTavern/fiAx-lcu-window/releases)下载最新版本。
+1. 从[这里](https://github.com/LeagueTavern/fix-lcu-window/releases)下载最新版本。
 2. 解压到任意目录下，桌面也好，总之你方便找到就行。
 3. 启动`Fix-LCU-Window.exe`，**程序可能会申请管理员权限，请务必点 [是] ，否则程序将无法运行**。
 4. 输入你想要执行的功能序号，按回车键执行。
