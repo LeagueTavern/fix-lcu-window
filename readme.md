@@ -1,5 +1,5 @@
 # Fix-League-Client-Update-Window
-英雄联盟客户端疑难杂症解决方案。
+英雄联盟客户端疑难杂症解决方案。[视频演示](https://www.bilibili.com/video/BV1Cw41147iS/)
 
 ![screenshot](./Assets/screenshot.png)
 
