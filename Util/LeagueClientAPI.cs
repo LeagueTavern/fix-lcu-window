@@ -3,7 +3,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
 
 namespace Fix_LCU_Window.Util
 {
@@ -27,13 +26,9 @@ namespace Fix_LCU_Window.Util
         {
             try
             {
-                var Response = await Client.GetAsync("/lol-settings/v1/local/video");
+                var Response = await Client.GetAsync("/riotclient/zoom-scale");
                 Response.EnsureSuccessStatusCode();
-
-                var ResponseJson = JsonConvert.DeserializeObject<dynamic>(await Response.Content.ReadAsStringAsync());
-                var ZoomScale = ResponseJson.data.ZoomScale;
-                
-                return ZoomScale;
+                return double.Parse(await Response.Content.ReadAsStringAsync());
             }
             catch
             {
