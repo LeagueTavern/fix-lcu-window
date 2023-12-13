@@ -34,12 +34,17 @@ namespace Fix_LCU_Window
             return (LeagueClientWindowHWnd, LeagueClientWindowCefHWnd);
         }
 
+        static bool needResize(RECT Rect)
+        {
+            return (Rect.Bottom - Rect.Top) /
+                (double)(Rect.Right - Rect.Left) != 0.5625;
+        }
+
         static async Task<int> FixLeagueClientWindow(bool forced = false)
         {
-
-            var LeagueClientWindowRect = new RECT();
             var LeagueClientWindow = GetLeagueClientWindowHandle();
-            var LeagueClientAPIClient = GetLCU();
+            var LeagueClientWindowRect = new RECT();
+            var LeagueClientWindowCefRect = new RECT();
 
             if (
                 LeagueClientWindow.LeagueClientWindowHWnd == IntPtr.Zero ||
@@ -49,26 +54,30 @@ namespace Fix_LCU_Window
                 return -1; // Failed to get leagueclient window handle
             }
 
+            if (IsMinimalized(LeagueClientWindow.LeagueClientWindowHWnd))
+            {
+                return 0;
+            }
+
+            GetWindowRect(LeagueClientWindow.LeagueClientWindowHWnd, ref LeagueClientWindowRect);
+            GetWindowRect(LeagueClientWindow.LeagueClientWindowCefHWnd, ref LeagueClientWindowCefRect);
+
+            if (!needResize(LeagueClientWindowRect) && !needResize(LeagueClientWindowCefRect) && !forced)
+            {
+                return 0;
+            }
+
+            var LeagueClientAPIClient = GetLCU();
+
             if (LeagueClientAPIClient == null)
             {
                 return -2; // Failed to get leagueclient api instance
             }
 
-            GetWindowRect(LeagueClientWindow.LeagueClientWindowHWnd, ref LeagueClientWindowRect);
-
-            var LeagueClientWindowWidth = LeagueClientWindowRect.Right - LeagueClientWindowRect.Left;
-            var LeagueClientWindowHeight = LeagueClientWindowRect.Bottom - LeagueClientWindowRect.Top;
-            var LeagueClientMinimized = IsMinimalized(LeagueClientWindow.LeagueClientWindowHWnd);
-
-            if ((LeagueClientMinimized || LeagueClientWindowHeight / (double)LeagueClientWindowWidth == 0.5625) && !forced)
-            {
-                return 0;
-            }
-
             var LeagueClientZoom = await LeagueClientAPIClient.GetClientZoom();
             var PrimaryScreenWidth = Screen.PrimaryScreen.Bounds.Width;
             var PrimaryScreenHeight = Screen.PrimaryScreen.Bounds.Height;
-            // var PrimaryScreenDpi = GetDpiForWindow(LeagueClientWindow.LeagueClientWindowHWnd) / 96.0;
+            var PrimaryScreenDpi = GetDpiForWindow(LeagueClientWindow.LeagueClientWindowHWnd) / 96.0;
 
             if (LeagueClientZoom == -1)
             {
