@@ -21,6 +21,7 @@ namespace Fix_LCU_Window
                 return null;
             }
 
+            // Console.WriteLine(LeagueClientUxArgs.ToString());
             // Return a new instance of LeagueClientAPI
             return new LeagueClientAPI(LeagueClientUxArgs.Port, LeagueClientUxArgs.Token);
         }
@@ -77,7 +78,7 @@ namespace Fix_LCU_Window
             var LeagueClientZoom = await LeagueClientAPIClient.GetClientZoom();
             var PrimaryScreenWidth = Screen.PrimaryScreen.Bounds.Width;
             var PrimaryScreenHeight = Screen.PrimaryScreen.Bounds.Height;
-            var PrimaryScreenDpi = GetDpiForWindow(LeagueClientWindow.LeagueClientWindowHWnd) / 96.0;
+            var PrimaryScreenDpi = GetDpiForWindow(LeagueClientWindow.LeagueClientWindowHWnd) / (double)GetDpiForSystem();
 
             if (LeagueClientZoom == -1)
             {
@@ -86,6 +87,9 @@ namespace Fix_LCU_Window
 
             var TargetLeagueClientWindowWidth = (int)(1280 * LeagueClientZoom);
             var TargetLeagueClientWindowHeight = (int)(720 * LeagueClientZoom);
+
+            PatchDpiChangedMessage(LeagueClientWindow.LeagueClientWindowHWnd);
+            PatchDpiChangedMessage(LeagueClientWindow.LeagueClientWindowCefHWnd);
 
             SetWindowPos(
                 LeagueClientWindow.LeagueClientWindowHWnd,

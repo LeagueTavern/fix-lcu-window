@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace Fix_LCU_Window.Util
 {
@@ -26,9 +27,13 @@ namespace Fix_LCU_Window.Util
         {
             try
             {
-                HttpResponseMessage Response = await Client.GetAsync("/riotclient/zoom-scale");
+                var Response = await Client.GetAsync("/lol-settings/v1/local/video");
                 Response.EnsureSuccessStatusCode();
-                return double.Parse(await Response.Content.ReadAsStringAsync());
+
+                var ResponseJson = JsonConvert.DeserializeObject<dynamic>(await Response.Content.ReadAsStringAsync());
+                var ZoomScale = ResponseJson.data.ZoomScale;
+                
+                return ZoomScale;
             }
             catch
             {
@@ -40,7 +45,7 @@ namespace Fix_LCU_Window.Util
         {
             try
             {
-                HttpResponseMessage response = await Client.PostAsync("/riotclient/kill-and-restart-ux", new StringContent(""));
+                var response = await Client.PostAsync("/riotclient/kill-and-restart-ux", new StringContent(""));
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -54,7 +59,7 @@ namespace Fix_LCU_Window.Util
         {
             try
             {
-                HttpResponseMessage response = await Client.PostAsync("/lol-lobby/v2/play-again", new StringContent(""));
+                var response = await Client.PostAsync("/lol-lobby/v2/play-again", new StringContent(""));
                 response.EnsureSuccessStatusCode();
                 return true;
             }

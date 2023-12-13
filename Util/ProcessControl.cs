@@ -9,6 +9,9 @@ namespace Fix_LCU_Window.Util
 {
     internal class ProcessControl
     {
+        const int WM_DPICHANGED = 0x02E0;
+        const int SW_SHOWMINIMIZED = 2;
+
         [DllImport("User32.dll", EntryPoint = "FindWindow")]
         public extern static IntPtr FindWindow(string lpClassName, string lpWindowName);
 
@@ -21,11 +24,17 @@ namespace Fix_LCU_Window.Util
         [DllImport("user32.dll", EntryPoint = "GetDpiForWindow")]
         public static extern uint GetDpiForWindow([In] IntPtr hmonitor);
 
+        [DllImport("user32.dll", EntryPoint = "GetDpiForSystem")]
+        public static extern uint GetDpiForSystem();
+
         [DllImport("user32.dll", EntryPoint = "GetWindowRect")]
         public static extern bool GetWindowRect(IntPtr hWnd, ref RECT lpRect);
 
         [DllImport("user32.dll", EntryPoint = "GetWindowPlacement")]
         public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+
+        [DllImport("user32.dll", EntryPoint = "SendMessage")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
         [Serializable]
         [StructLayout(LayoutKind.Sequential)]
@@ -104,7 +113,15 @@ namespace Fix_LCU_Window.Util
             var placement = new WINDOWPLACEMENT();
             placement.length = Marshal.SizeOf(typeof(WINDOWPLACEMENT));
             GetWindowPlacement(hWnd, ref placement);
-            return placement.showCmd == 2; // SW_SHOWMINIMIZED 
+            return placement.showCmd == SW_SHOWMINIMIZED;
+        }
+
+        public static void PatchDpiChangedMessage(IntPtr hWnd)
+        {
+            var dpi = GetDpiForWindow(hWnd);
+            var wParam = (IntPtr)((int)dpi << 16 | (int)dpi);
+            var lParam = Marshal.UnsafeAddrOfPinnedArrayElement(new int[4], 0);
+            SendMessage(hWnd, WM_DPICHANGED, wParam, lParam);
         }
     }
 }
